@@ -8,7 +8,7 @@ class Settings(QSettings):
 
     def get_workspace_root(self) -> str:
         ret: Any = self.value("workspace_root", os.path.expanduser("~/workspace"))
-        str_ret: str = cast(ret, str)
+        str_ret: str = cast(str, ret)
         return str_ret
 
     def set_workspace_root(self, workspace_root: str) -> None:
