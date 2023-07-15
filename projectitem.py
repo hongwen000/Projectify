@@ -10,14 +10,25 @@ class ProjectItem(QListWidgetItem):
         self.project_path = project_path
         self.run_script_path = os.path.join(project_path, "run.bat")
 
+        if os.path.exists(os.path.join(project_path, "main.py")):
+            self.entry_script_path = os.path.join(project_path, "main.py")
+        elif os.path.exists(os.path.join(project_path, "main.ps1")):
+            self.entry_script_path = os.path.join(project_path, "main.ps1")
+        else:
+            self.entry_script_path = None
+
     @classmethod
     def create_python_project(cls, workspace_root, project_name, interpreter_path):
         project_path = os.path.join(workspace_root, project_name)
         os.makedirs(project_path, exist_ok=True)
 
+        entry_script_path = os.path.join(project_path, "main.py")
+        with open(entry_script_path, "w") as f:
+            f.write("# Python script")
+
         run_script_path = os.path.join(project_path, "run.bat")
         with open(run_script_path, "w") as f:
-            f.write(f'@echo off\n"{interpreter_path}" "{project_path}\\script.py"\npause')
+            f.write(f'@echo off\n"{interpreter_path}" "{entry_script_path}"\npause')
 
         return cls(project_path)
 
@@ -26,9 +37,13 @@ class ProjectItem(QListWidgetItem):
         project_path = os.path.join(workspace_root, project_name)
         os.makedirs(project_path, exist_ok=True)
 
+        entry_script_path = os.path.join(project_path, "main.ps1")
+        with open(entry_script_path, "w") as f:
+            f.write("# Powershell script")
+
         run_script_path = os.path.join(project_path, "run.bat")
         with open(run_script_path, "w") as f:
-            f.write(f'@echo off\npowershell -ExecutionPolicy Bypass -File "{project_path}\\script.ps1"\npause')
+            f.write(f'@echo off\npowershell -ExecutionPolicy Bypass -File "{entry_script_path}"\npause')
 
         return cls(project_path)
 
@@ -43,7 +58,14 @@ class ProjectItem(QListWidgetItem):
 
         return cls(project_path)
 
-    def get_script(self):
+    def get_entry_script(self):
+        if self.entry_script_path is None:
+            return ""
+
+        with open(self.entry_script_path, "r") as f:
+            return f.read()
+
+    def get_wrapper_script(self):
         with open(self.run_script_path, "r") as f:
             return f.read()
 
