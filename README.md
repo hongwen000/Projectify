@@ -1,3 +1,3 @@
-Sure, I will make the necessary modifications. Here is the updated code:
+To add a settings dialog to the program, we need to create a new `SettingsDialog` class and add a button to the `MainWindow` class that opens the settings dialog. We also need to modify the `Settings` class to allow the settings to be changed.
 
-mainwindow.py
+**settings_dialog.py**

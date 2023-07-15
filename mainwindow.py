@@ -1,11 +1,11 @@
 from typing import Optional, cast
-from PyQt5.QtWidgets import QMainWindow, QListWidget, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QListWidget, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog, QDialog
 from projectitem import ProjectItem
 from settings import Settings
 from editor import Editor
 import os
 from startupmanager import default_startup_manager
-
+from settings_dialog import SettingsDialog
 
 class MainWindow(QMainWindow):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
@@ -30,12 +30,16 @@ class MainWindow(QMainWindow):
         self.edit_entry_script_button.clicked.connect(self.on_edit_entry_script_clicked)
         self.edit_wrapper_script_button.clicked.connect(self.on_edit_wrapper_script_clicked)
 
+        self.settings_button: QPushButton = QPushButton("Settings")
+        self.settings_button.clicked.connect(self.on_settings_clicked)
+
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.list_widget)
         left_layout.addWidget(self.add_to_startup_button)
         left_layout.addWidget(self.delete_from_startup_button)
         left_layout.addWidget(self.new_project_button)
         left_layout.addWidget(self.autostart_status_label)
+        left_layout.addWidget(self.settings_button)
 
         right_layout = QVBoxLayout()
         right_layout.addWidget(self.editor)
@@ -53,7 +57,13 @@ class MainWindow(QMainWindow):
 
         self.load_projects()
 
+    def on_settings_clicked(self) -> None:
+        settings_dialog = SettingsDialog(self)
+        if settings_dialog.exec_() == QDialog.Accepted:
+            self.load_projects()
+
     def load_projects(self) -> None:
+        self.list_widget.clear()
         workspace_root: str = self.settings.get_workspace_root()
 
         for dir_name in os.listdir(workspace_root):
