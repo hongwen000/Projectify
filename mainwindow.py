@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 from PyQt5.QtWidgets import QMainWindow, QListWidget, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog
 from projectitem import ProjectItem
 from settings import Settings
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
             self.autostart_status_label.clear()
             return
 
-        project_item: ProjectItem = selected_items[0]
+        project_item: ProjectItem = cast(ProjectItem, selected_items[0])
         self.editor.open_file(project_item.get_entry_script_path())
         self.update_autostart_status(project_item)
 
@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
         if not selected_items:
             return
 
-        project_item: ProjectItem = selected_items[0]
+        project_item: ProjectItem = cast(ProjectItem, selected_items[0])
         project_item.add_to_startup()
         self.update_autostart_status(project_item)
 
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         if not selected_items:
             return
 
-        project_item: ProjectItem = selected_items[0]
+        project_item: ProjectItem = cast(ProjectItem, selected_items[0])
         project_item.delete_from_startup()
         self.update_autostart_status(project_item)
 
@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
         if not selected_items:
             return
 
-        project_item: ProjectItem = selected_items[0]
+        project_item: ProjectItem = cast(ProjectItem, selected_items[0])
         self.editor.open_file(project_item.get_entry_script_path())
 
     def on_edit_wrapper_script_clicked(self) -> None:
@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         if not selected_items:
             return
 
-        project_item: ProjectItem = selected_items[0]
+        project_item: ProjectItem = cast(ProjectItem, selected_items[0])
         self.editor.open_file(project_item.get_wrapper_script_path())
 
     def update_autostart_status(self, project_item: ProjectItem) -> None:
