@@ -5,7 +5,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install the dependencies
-pip install PyQt5
+python3 -m pip install PyQt5
 
 # Run the mainwindow.py script
-python mainwindow.py
+python3 main.py
