@@ -70,7 +70,9 @@ class MainWindow(QMainWindow):
             return
 
         project_item: ProjectItem = cast(ProjectItem, selected_items[0])
-        self.editor.open_file(project_item.get_entry_script_path())
+        entry_script_path = project_item.get_entry_script_path()
+        if entry_script_path:
+            self.editor.open_file(entry_script_path)
         self.update_autostart_status(project_item)
 
     def on_add_to_startup_clicked(self) -> None:
@@ -132,7 +134,9 @@ class MainWindow(QMainWindow):
             return
 
         project_item: ProjectItem = cast(ProjectItem, selected_items[0])
-        self.editor.open_file(project_item.get_entry_script_path())
+        entry_script_path = project_item.get_entry_script_path()
+        if entry_script_path:
+            self.editor.open_file(entry_script_path)
 
     def on_edit_wrapper_script_clicked(self) -> None:
         selected_items = self.list_widget.selectedItems()
