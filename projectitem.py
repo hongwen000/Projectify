@@ -1,36 +1,60 @@
 from PyQt5.QtWidgets import QListWidgetItem
-from startupmanager import StartupManager
+from settings import Settings
 import os
+import subprocess
 
 class ProjectItem(QListWidgetItem):
-    def __init__(self, dir_path, parent=None):
-        super().__init__(parent)
+    def __init__(self, project_path):
+        super().__init__(os.path.basename(project_path))
 
-        self.dir_path = dir_path
-        self.startup_manager = StartupManager()
+        self.project_path = project_path
+        self.run_script_path = os.path.join(project_path, "run.bat")
 
-        self.setText(os.path.basename(dir_path))
+    @classmethod
+    def create_python_project(cls, workspace_root, project_name, interpreter_path):
+        project_path = os.path.join(workspace_root, project_name)
+        os.makedirs(project_path, exist_ok=True)
+
+        run_script_path = os.path.join(project_path, "run.bat")
+        with open(run_script_path, "w") as f:
+            f.write(f'@echo off\n"{interpreter_path}" "{project_path}\\script.py"\npause')
+
+        return cls(project_path)
+
+    @classmethod
+    def create_powershell_project(cls, workspace_root, project_name):
+        project_path = os.path.join(workspace_root, project_name)
+        os.makedirs(project_path, exist_ok=True)
+
+        run_script_path = os.path.join(project_path, "run.bat")
+        with open(run_script_path, "w") as f:
+            f.write(f'@echo off\npowershell -ExecutionPolicy Bypass -File "{project_path}\\script.ps1"\npause')
+
+        return cls(project_path)
+
+    @classmethod
+    def create_executable_project(cls, workspace_root, project_name, executable_path):
+        project_path = os.path.join(workspace_root, project_name)
+        os.makedirs(project_path, exist_ok=True)
+
+        run_script_path = os.path.join(project_path, "run.bat")
+        with open(run_script_path, "w") as f:
+            f.write(f'@echo off\n"{executable_path}"\npause')
+
+        return cls(project_path)
 
     def get_script(self):
-        script_path = os.path.join(self.dir_path, "script.py")
-
-        if not os.path.isfile(script_path):
-            return ""
-
-        with open(script_path, "r") as file:
-            return file.read()
-
-    def set_script(self, script):
-        script_path = os.path.join(self.dir_path, "script.py")
-
-        with open(script_path, "w") as file:
-            file.write(script)
-
-    def add_to_startup(self):
-        self.startup_manager.add_to_startup(self.dir_path)
+        with open(self.run_script_path, "r") as f:
+            return f.read()
 
     def is_startup_item(self):
-        return self.startup_manager.is_startup_item(self.dir_path)
+        startup_folder = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
+        return os.path.exists(os.path.join(startup_folder, f"{self.text()}.bat"))
+
+    def add_to_startup(self):
+        startup_folder = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
+        subprocess.run(f'copy "{self.run_script_path}" "{startup_folder}\\{self.text()}.bat"', shell=True)
 
     def delete_from_startup(self):
-        self.startup_manager.delete_from_startup(self.dir_path)
+        startup_folder = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
+        subprocess.run(f'del "{startup_folder}\\{self.text()}.bat"', shell=True)

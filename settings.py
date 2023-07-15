@@ -6,7 +6,7 @@ class Settings(QSettings):
         super().__init__(parent)
 
     def get_workspace_root(self):
-        return self.value("workspace_root", os.getcwd())
+        return self.value("workspace_root", os.path.expanduser("~/workspace"))
 
     def set_workspace_root(self, workspace_root):
         self.setValue("workspace_root", workspace_root)

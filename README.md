@@ -1,4 +1,4 @@
-Sure, we can adjust the layout to have the list widget and the buttons on the left, and the text editor on the right. We will use a QHBoxLayout at the top level, and a QVBoxLayout for the left side.
+Sure, we can add a new button and a dialog box to create a new project. We will use a QInputDialog to get the project name, and a QFileDialog to select the Python interpreter or the executable file. We will also add a QComboBox to select the script language.
 
 Here is the updated code:
 

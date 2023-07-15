@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QListWidget, QTextEdit, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QListWidget, QTextEdit, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog, QComboBox
 from projectitem import ProjectItem
 from settings import Settings
 import os
@@ -13,16 +13,19 @@ class MainWindow(QMainWindow):
         self.text_edit = QTextEdit()
         self.add_to_startup_button = QPushButton("Add to Startup")
         self.delete_from_startup_button = QPushButton("Delete from Startup")
+        self.new_project_button = QPushButton("New Project")
         self.autostart_status_label = QLabel()
 
         self.list_widget.itemSelectionChanged.connect(self.on_item_selection_changed)
         self.add_to_startup_button.clicked.connect(self.on_add_to_startup_clicked)
         self.delete_from_startup_button.clicked.connect(self.on_delete_from_startup_clicked)
+        self.new_project_button.clicked.connect(self.on_new_project_clicked)
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.list_widget)
         left_layout.addWidget(self.add_to_startup_button)
         left_layout.addWidget(self.delete_from_startup_button)
+        left_layout.addWidget(self.new_project_button)
         left_layout.addWidget(self.autostart_status_label)
 
         layout = QHBoxLayout()
@@ -76,6 +79,36 @@ class MainWindow(QMainWindow):
         project_item = selected_items[0]
         project_item.delete_from_startup()
         self.update_autostart_status(project_item)
+
+    def on_new_project_clicked(self):
+        project_name, ok = QInputDialog.getText(self, "New Project", "Project Name:")
+
+        if not ok or not project_name:
+            return
+
+        script_language, ok = QInputDialog.getItem(self, "New Project", "Script Language:", ["Python", "Powershell", "Executable"], 0, False)
+
+        if not ok or not script_language:
+            return
+
+        if script_language == "Python":
+            interpreter_path = QFileDialog.getOpenFileName(self, "Select Python Interpreter", "", "Python Interpreter (*.exe)")[0]
+
+            if not interpreter_path:
+                return
+
+            project_item = ProjectItem.create_python_project(self.settings.get_workspace_root(), project_name, interpreter_path)
+        elif script_language == "Powershell":
+            project_item = ProjectItem.create_powershell_project(self.settings.get_workspace_root(), project_name)
+        else:
+            executable_path = QFileDialog.getOpenFileName(self, "Select Executable", "", "Executable (*.exe)")[0]
+
+            if not executable_path:
+                return
+
+            project_item = ProjectItem.create_executable_project(self.settings.get_workspace_root(), project_name, executable_path)
+
+        self.list_widget.addItem(project_item)
 
     def update_autostart_status(self, project_item):
         if project_item.is_startup_item():
