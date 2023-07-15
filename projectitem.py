@@ -7,7 +7,6 @@ import subprocess
 class ProjectItem(QListWidgetItem):
     def __init__(self, project_path: str):
         super().__init__(os.path.basename(project_path))
-
         self.project_path: str = project_path
         self.run_script_path: str = os.path.join(project_path, "run.bat")
         self.entry_script_path: Optional[str]
@@ -69,18 +68,6 @@ class ProjectItem(QListWidgetItem):
     def get_wrapper_script(self) -> str:
         with open(self.run_script_path, "r") as f:
             return f.read()
-
-    def is_startup_item(self) -> bool:
-        startup_folder: str = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
-        return os.path.exists(os.path.join(startup_folder, f"{self.text()}.bat"))
-
-    def add_to_startup(self) -> None:
-        startup_folder: str = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
-        subprocess.run(f'copy "{self.run_script_path}" "{startup_folder}\\{self.text()}.bat"', shell=True)
-
-    def delete_from_startup(self) -> None:
-        startup_folder: str = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
-        subprocess.run(f'del "{startup_folder}\\{self.text()}.bat"', shell=True)
 
     def get_entry_script_path(self) -> Optional[str]:
         return self.entry_script_path

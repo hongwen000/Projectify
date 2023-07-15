@@ -4,6 +4,7 @@ from projectitem import ProjectItem
 from settings import Settings
 from editor import Editor
 import os
+from startupmanager import default_startup_manager
 
 
 class MainWindow(QMainWindow):
@@ -48,6 +49,7 @@ class MainWindow(QMainWindow):
         central_widget: QWidget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+        self.startup_manager = default_startup_manager()
 
         self.load_projects()
 
@@ -82,7 +84,7 @@ class MainWindow(QMainWindow):
             return
 
         project_item: ProjectItem = cast(ProjectItem, selected_items[0])
-        project_item.add_to_startup()
+        self.startup_manager.add_to_startup(project_item)
         self.update_autostart_status(project_item)
 
     def on_delete_from_startup_clicked(self) -> None:
@@ -92,7 +94,7 @@ class MainWindow(QMainWindow):
             return
 
         project_item: ProjectItem = cast(ProjectItem, selected_items[0])
-        project_item.delete_from_startup()
+        self.startup_manager.delete_from_startup(project_item)
         self.update_autostart_status(project_item)
 
     def on_new_project_clicked(self) -> None:
@@ -148,7 +150,7 @@ class MainWindow(QMainWindow):
         self.editor.open_file(project_item.get_wrapper_script_path())
 
     def update_autostart_status(self, project_item: ProjectItem) -> None:
-        if project_item.is_startup_item():
+        if self.startup_manager.is_startup_item(project_item):
             self.autostart_status_label.setText("This project is added to autostart.")
         else:
             self.autostart_status_label.setText("This project is not added to autostart.")
