@@ -80,3 +80,9 @@ class ProjectItem(QListWidgetItem):
     def delete_from_startup(self):
         startup_folder = os.path.expanduser(r'~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup')
         subprocess.run(f'del "{startup_folder}\\{self.text()}.bat"', shell=True)
+
+    def get_entry_script_path(self):
+        return self.entry_script_path
+
+    def get_wrapper_script_path(self):
+        return self.run_script_path
