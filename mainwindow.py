@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QListWidget, QTextEdit, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog, QComboBox
+from PyQt5.QtWidgets import QMainWindow, QListWidget, QVBoxLayout, QWidget, QPushButton, QLabel, QHBoxLayout, QInputDialog, QFileDialog
 from projectitem import ProjectItem
 from settings import Settings
+from editor import Editor
 import os
-import subprocess
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -11,14 +11,14 @@ class MainWindow(QMainWindow):
         self.settings = Settings()
 
         self.list_widget = QListWidget()
-        self.text_edit = QTextEdit()
         self.add_to_startup_button = QPushButton("Add to Startup")
         self.delete_from_startup_button = QPushButton("Delete from Startup")
         self.new_project_button = QPushButton("New Project")
         self.edit_entry_script_button = QPushButton("Edit Entry Script")
         self.edit_wrapper_script_button = QPushButton("Edit Wrapper Script")
-        self.open_in_vscode_button = QPushButton("Open in VSCode")
         self.autostart_status_label = QLabel()
+
+        self.editor = Editor()
 
         self.list_widget.itemSelectionChanged.connect(self.on_item_selection_changed)
         self.add_to_startup_button.clicked.connect(self.on_add_to_startup_clicked)
@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
         self.new_project_button.clicked.connect(self.on_new_project_clicked)
         self.edit_entry_script_button.clicked.connect(self.on_edit_entry_script_clicked)
         self.edit_wrapper_script_button.clicked.connect(self.on_edit_wrapper_script_clicked)
-        self.open_in_vscode_button.clicked.connect(self.on_open_in_vscode_clicked)
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.list_widget)
@@ -36,10 +35,9 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.autostart_status_label)
 
         right_layout = QVBoxLayout()
-        right_layout.addWidget(self.text_edit)
+        right_layout.addWidget(self.editor)
         right_layout.addWidget(self.edit_entry_script_button)
         right_layout.addWidget(self.edit_wrapper_script_button)
-        right_layout.addWidget(self.open_in_vscode_button)
 
         layout = QHBoxLayout()
         layout.addLayout(left_layout)
@@ -65,12 +63,12 @@ class MainWindow(QMainWindow):
         selected_items = self.list_widget.selectedItems()
 
         if not selected_items:
-            self.text_edit.clear()
+            self.editor.clear()
             self.autostart_status_label.clear()
             return
 
         project_item = selected_items[0]
-        self.text_edit.setPlainText(project_item.get_entry_script())
+        self.editor.open_file(project_item.get_entry_script_path())
         self.update_autostart_status(project_item)
 
     def on_add_to_startup_clicked(self):
@@ -105,7 +103,7 @@ class MainWindow(QMainWindow):
             return
 
         if script_language == "Python":
-            interpreter_path = QFileDialog.getOpenFileName(self, "Select Python Interpreter", "", "")[0]
+            interpreter_path = QFileDialog.getOpenFileName(self, "Select Python Interpreter", "", "Python Interpreter (*.exe)")[0]
 
             if not interpreter_path:
                 return
@@ -114,7 +112,7 @@ class MainWindow(QMainWindow):
         elif script_language == "Powershell":
             project_item = ProjectItem.create_powershell_project(self.settings.get_workspace_root(), project_name)
         else:
-            executable_path = QFileDialog.getOpenFileName(self, "Select Executable", "", "")[0]
+            executable_path = QFileDialog.getOpenFileName(self, "Select Executable", "", "Executable (*.exe)")[0]
 
             if not executable_path:
                 return
@@ -130,7 +128,7 @@ class MainWindow(QMainWindow):
             return
 
         project_item = selected_items[0]
-        self.text_edit.setPlainText(project_item.get_entry_script())
+        self.editor.open_file(project_item.get_entry_script_path())
 
     def on_edit_wrapper_script_clicked(self):
         selected_items = self.list_widget.selectedItems()
@@ -139,16 +137,7 @@ class MainWindow(QMainWindow):
             return
 
         project_item = selected_items[0]
-        self.text_edit.setPlainText(project_item.get_wrapper_script())
-
-    def on_open_in_vscode_clicked(self):
-        selected_items = self.list_widget.selectedItems()
-
-        if not selected_items:
-            return
-
-        project_item = selected_items[0]
-        subprocess.run(f'code "{project_item.project_path}"', shell=True)
+        self.editor.open_file(project_item.get_wrapper_script_path())
 
     def update_autostart_status(self, project_item):
         if project_item.is_startup_item():
