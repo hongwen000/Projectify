@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
             return
 
         if script_language == "Python":
-            interpreter_path = QFileDialog.getOpenFileName(self, "Select Python Interpreter", "", "Python Interpreter (*.exe)")[0]
+            interpreter_path = QFileDialog.getOpenFileName(self, "Select Python Interpreter", "", "")[0]
 
             if not interpreter_path:
                 return
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
         elif script_language == "Powershell":
             project_item = ProjectItem.create_powershell_project(self.settings.get_workspace_root(), project_name)
         else:
-            executable_path = QFileDialog.getOpenFileName(self, "Select Executable", "", "Executable (*.exe)")[0]
+            executable_path = QFileDialog.getOpenFileName(self, "Select Executable", "", "")[0]
 
             if not executable_path:
                 return
